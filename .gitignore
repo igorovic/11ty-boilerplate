@@ -1,0 +1,10 @@
+node_modules
+public
+.env
+# Local Netlify folder
+.netlify
+
+local.env.json
+
+*.log
+.vercel

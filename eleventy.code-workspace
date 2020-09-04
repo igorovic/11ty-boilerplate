@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "./node_modules/@11ty"
+		},
+		{
+			"path": "node_modules/eleventy-plugin-tailwindcss"
+		}
+	],
+	"settings": {}
+}
