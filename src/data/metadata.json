@@ -1,5 +1,6 @@
 {
     "title": "Your Blog Name",
+    "lang": "fr",
     "url": "https://myurl.com/",
     "description": "I am writing about my experiences as a naval navel-gazer.",
     "keywords": "testing 11ty",
