@@ -19,7 +19,6 @@
     "autoprefixer": "^9.8.6",
     "cssnano": "^4.1.10",
     "eleventy-plugin-seo": "^0.5.1",
-    "eleventy-plugin-tailwindcss": "^0.2.4",
     "flatted": "^3.0.4",
     "fs-extra": "^9.0.1",
     "html-minifier": "^4.0.0",

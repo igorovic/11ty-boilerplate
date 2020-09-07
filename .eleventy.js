@@ -6,7 +6,6 @@ const minify = require('html-minifier').minify;
 const { renderToString } = require('./dist/hydrate');
 const { DateTime } = require("luxon");
 const pluginRss = require("@11ty/eleventy-plugin-rss");
-//const pluginTailwind = require("eleventy-plugin-tailwindcss");
 const json5 = require('json5');
 const flatted = require('flatted');
 const postCSS = require('./11ty-plugins/postcss');
@@ -20,20 +19,7 @@ function selectivBuild(){
 module.exports = function(eleventyConfig) {
     try{
         eleventyConfig.addPlugin(pluginRss);
-        /* eleventyConfig.addPlugin(pluginTailwind, {
-            src: ["src/tailwind.css"],
-            excludeNodeModules: true,
-            dest: "styles",
-            keepFolderStructure: false,
-            configFile: "./tailwind.config.js",
-            autoprefixer: true,
-            autoprefixerOptions: {},
-            minify: !dev,
-            minifyOptions: {}
-        }); */
-        //console.log(eleventyConfig);
-        //eleventyConfig.addPlugin(stencilPlugin);
-
+        
         eleventyConfig.addTransform("stencil-hydrate", async function(content, outputPath) {
             if(path.extname(outputPath) !== '.html')
                 return content;
