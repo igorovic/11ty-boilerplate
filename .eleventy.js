@@ -1,4 +1,5 @@
 const url = require('url');
+const fs = require('fs');
 const path = require('path');
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
@@ -35,12 +36,45 @@ module.exports = function(eleventyConfig) {
             // inject tailwind.css in <head>
             if(path.extname(outputPath) !== '.html' || (this.frontMatter.data && this.frontMatter.data.tailwind === false))
                 return content;
+            fs.exists('./src/tailwind.css', ()=>{
+                const dom = new JSDOM(content);
+                let sc = dom.window.document.createElement("link");
+                sc.setAttribute("rel", "stylesheet");
+                sc.setAttribute("href", "/styles/tailwind.css");
+                dom.window.document.head.appendChild(sc);
+                //console.log('inject tailwind.css', outputPath);
+                return dom.serialize();
+            })
+            return content;
+        });
+
+        eleventyConfig.addTransform("styles-inject", async function(content, outputPath) {
+            // inject tailwind.css in <head>
+            if(path.extname(outputPath) !== '.html' || (this.frontMatter.data && !this.frontMatter.data.styles))
+                return content;
+            
+            let styles = []
+            if(Array.isArray(this.frontMatter.data.styles))
+                styles = this.frontMatter.data.styles;
+            else if (typeof this.frontMatter.data.styles === 'string')
+                styles = [this.frontMatter.data.styles]
+            else {
+                console.error('frontMatter styles must be array or string for', outputPath)
+                return content;
+            }
+
             const dom = new JSDOM(content);
-            let sc = dom.window.document.createElement("link");
-            sc.setAttribute("rel", "stylesheet");
-            sc.setAttribute("href", "/styles/tailwind.css");
-            dom.window.document.head.appendChild(sc);
-            //console.log('inject tailwind.css', outputPath);
+            
+            styles.forEach((styleFile) => {
+                if(fs.existsSync(path.join('public', styleFile))){
+                    
+                    let sc = dom.window.document.createElement("link");
+                    sc.setAttribute("rel", "stylesheet");
+                    sc.setAttribute("href", styleFile);
+                    dom.window.document.head.appendChild(sc);
+                }
+            })
+            
             return dom.serialize();
         });
 

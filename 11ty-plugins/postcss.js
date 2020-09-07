@@ -27,6 +27,20 @@ function postCss(){
                 })
         }
     })
+    fs.readFile('src/styles/index.css', (err, css) => {
+        if(err){
+            console.log(err);
+        }else{
+            postcss(plugins)
+                .process(css, { from: 'src/styles/index.css', to: 'public/styles/index.css' })
+                .then(result => {
+                    fs.outputFile(result.opts.to, result.css, () => true)
+                    if ( result.map ) {
+                        fs.outputFile(result.opts.to+'.map', result.map, () => true)
+                    }
+                })
+        }
+    })
 }
 
 module.exports = postCss;

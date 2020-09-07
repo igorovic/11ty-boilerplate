@@ -1,6 +1,7 @@
 ---
 layout: layouts/default.njk
 title: Bienvenu
+styles: /styles/index.css
 ---
 <h1>Hello World</h1>
 <p class="example text-tiny">test</p>
@@ -9,6 +10,9 @@ title: Bienvenu
 <pre>{{ metadata | json5 | safe }}</pre>
 <p class="desc">{{ description }}</p>
 
+<p class="article">
+My article
+</p>
 
 <mg-greetings>
 Bonjour
