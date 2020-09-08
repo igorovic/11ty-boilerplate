@@ -7,10 +7,10 @@
 			"path": "./node_modules/@11ty"
 		},
 		{
-			"path": "node_modules/eleventy-plugin-tailwindcss"
+			"path": "node_modules/tailwindcss"
 		},
 		{
-			"path": "node_modules/tailwindcss"
+			"path": "node_modules/posthtml"
 		}
 	],
 	"settings": {}
