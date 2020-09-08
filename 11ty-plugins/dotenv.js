@@ -6,13 +6,13 @@ const dotEnv =  function() {
     let result = {}
     try{
         result = dotenv.config();
-        debug('dotenv: %O', result);
         if (result.error) {
             throw result.error
         }
+        debug('dotenv: %O', result);
         return result.parsed;
     }catch(err){
-        console.error(err);
+        console.error('11ty plugin dotenv: ', err.message);
     }
     return result;
 };
