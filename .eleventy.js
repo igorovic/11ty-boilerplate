@@ -4,12 +4,12 @@ const path = require('path');
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 const minify = require('html-minifier').minify;
-const { renderToString } = require('./dist/hydrate');
 const { DateTime } = require("luxon");
 const pluginRss = require("@11ty/eleventy-plugin-rss");
 const json5 = require('json5');
 const flatted = require('flatted');
 const postCSS = require('./11ty-plugins/postcss');
+const Debug = require('debug');
 
 const dev = process.env.NODE_ENV === 'development';
 
@@ -19,21 +19,30 @@ function selectivBuild(){
 
 module.exports = function(eleventyConfig) {
     try{
+        eleventyConfig.setDataDeepMerge(true);
         eleventyConfig.addPlugin(pluginRss);
         
         eleventyConfig.addTransform("stencil-hydrate", async function(content, outputPath) {
-            if(path.extname(outputPath) !== '.html')
-                return content;
-            const { html } = await renderToString(content, {
-                prettyHtml: true,
-                removeScripts: false
-            })
-            //console.log('hydrate ', outputPath);
-            return html;
+            const debug = Debug('11ty-transform-stencil-hydrate');
+            try{
+                const { renderToString } = require('./dist/hydrate');
+                if(path.extname(outputPath) !== '.html')
+                    return content;
+                const { html } = await renderToString(content, {
+                    prettyHtml: true,
+                    removeScripts: false
+                })
+                debug('hydrate ', outputPath);
+                return html;
+            }catch(err){
+                console.error(err);
+            }
+            return content;
         });
 
         eleventyConfig.addTransform("tailwind-inject", async function(content, outputPath) {
             // inject tailwind.css in <head>
+            const debug = Debug('11ty-transform-tailwind-inject');
             if(path.extname(outputPath) !== '.html' || (this.frontMatter.data && this.frontMatter.data.tailwind === false))
                 return content;
             fs.exists('./src/tailwind.css', ()=>{
@@ -42,13 +51,14 @@ module.exports = function(eleventyConfig) {
                 sc.setAttribute("rel", "stylesheet");
                 sc.setAttribute("href", "/styles/tailwind.css");
                 dom.window.document.head.appendChild(sc);
-                //console.log('inject tailwind.css', outputPath);
+                debug(outputPath);
                 return dom.serialize();
             })
             return content;
         });
 
         eleventyConfig.addTransform("styles-inject", async function(content, outputPath) {
+            const debug = Debug('11ty-transform-styles-inject')
             // inject tailwind.css in <head>
             if(path.extname(outputPath) !== '.html' || (this.frontMatter.data && !this.frontMatter.data.styles))
                 return content;
@@ -67,7 +77,7 @@ module.exports = function(eleventyConfig) {
             
             styles.forEach((styleFile) => {
                 if(fs.existsSync(path.join('public', styleFile))){
-                    
+                    debug(outputPath);
                     let sc = dom.window.document.createElement("link");
                     sc.setAttribute("rel", "stylesheet");
                     sc.setAttribute("href", styleFile);
@@ -79,9 +89,11 @@ module.exports = function(eleventyConfig) {
         });
 
         eleventyConfig.addTransform("minify-html", async function(content, outputPath) {
-            // inject tailwind.css in <head>
-            if(path.extname(outputPath) !== '.html' || dev)
+            const debug = Debug('11ty-transform-minify-html')
+            // minify Html
+            if(path.extname(outputPath) !== '.html' || dev || !content)
                 return content;
+            debug(outputPath);
             return minify(content, {
                 removeAttributeQuotes: false,
                 collapseWhitespace: true
@@ -141,6 +153,7 @@ module.exports = function(eleventyConfig) {
             includes: "../includes",
             data: "../data",
             output: "public"
-        }
+        },
+        templateFormats: ["njk"],
     }
   };
