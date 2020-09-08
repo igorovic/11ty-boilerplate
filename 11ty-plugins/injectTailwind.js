@@ -1,23 +1,22 @@
-//const fs = require('fs');
 const path = require('path');
 const posthtml = require ("posthtml");
-
-/* const jsdom = require("jsdom");
-const { JSDOM } = jsdom; */
 
 const Debug = require('debug');
 const debug = Debug('Dyve:injectTailwindcss')
 
-const dev = process.env.NODE_ENV === 'development';
+const dev = String(process.env.NODE_ENV).toLowerCase() === 'development';
+let _pluginOptions = {};
 
-
+/*
+**  add tailwind: false in frontMatter to disable tailwind styles for a certain page
+*/
 const injectTailwind = async function(content, outputPath) {
     // inject tailwind.css in <head>
     if(path.extname(outputPath) !== '.html' || (this.frontMatter.data && this.frontMatter.data.tailwind === false))
         return content;
 
     const injectStylesheet = (tree) =>{
-        debug(outputPath);
+        debug('inject in: %s - href: %s', outputPath, _pluginOptions.url || '/styles/tailwind.css');
         return new Promise((resolve) => {
             tree.match({ tag: 'head' }, (node) => {
                 //fs.exists('../src/tailwind.css', ()=>{
@@ -26,7 +25,7 @@ const injectTailwind = async function(content, outputPath) {
                         tag: 'link',
                         attrs: {
                             rel: 'stylesheet',
-                            href: '/styles/tailwind.css'
+                            href: _pluginOptions.url || '/styles/tailwind.css'
                         }
                     })
                     node.content.push('\n');
@@ -43,7 +42,7 @@ const injectTailwind = async function(content, outputPath) {
     .process(content);
     result = R.html;
     return result;
-
+    
    /*  fs.exists('./src/tailwind.css', ()=>{
         const dom = new JSDOM(content);
         let sc = dom.window.document.createElement("link");
@@ -59,6 +58,7 @@ const injectTailwind = async function(content, outputPath) {
 module.exports = {
     initArguments: {},
     configFunction: async (eleventyConfig, pluginOptions = {}) => {
+        _pluginOptions = pluginOptions;
         eleventyConfig.addTransform("injectTailwind", injectTailwind);
     },
 };

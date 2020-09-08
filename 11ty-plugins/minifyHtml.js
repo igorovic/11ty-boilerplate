@@ -2,7 +2,7 @@ const minify = require('html-minifier').minify;
 const Debug = require('debug');
 const debug = Debug('Dyve:minify-html');
 
-const dev = process.env.NODE_ENV === 'development';
+const dev = String(process.env.NODE_ENV).toLowerCase() === 'development';
 
 const minifyHtml = async function(content, outputPath) {
     // minify Html

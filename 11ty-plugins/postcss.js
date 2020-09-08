@@ -4,11 +4,16 @@ const { readdirSync } = require('fs');
 const autoprefixer = require('autoprefixer');
 const postcss = require('postcss');
 const cssnano = require('cssnano');
+const sass = require('node-sass');
 const tailwindcss = require('tailwindcss');
-const debug = require('debug')('11ty-plugins-postcss')
+const debug = require('debug')('Dyve:postcss')
 
-const dev = process.env.NODE_ENV === 'development';
+const dev = String(process.env.NODE_ENV).toLowerCase() === 'development';
 
+/*
+** TODO: files imported from an .scss should not be transpiled. Currently they are
+** event if the import works.
+*/ 
 function WalkSync(Path, prefix, options={ignoreDirs: false}){
     let Files = [];
     try{
@@ -39,9 +44,11 @@ const plugins = [
 const defaultOptions = {
     outDir: 'public/styles',
     srcDir: 'src/styles',
-    files: [
-        'src/tailwind.css'
-    ]
+    files: [],
+    tailwindcss: {
+        src: require.resolve('tailwindcss/tailwind.css'),
+        dest: 'public/styles'
+    }
 }
 
 function postCss(_, options = defaultOptions){
@@ -51,10 +58,36 @@ function postCss(_, options = defaultOptions){
     debug(styleFiles);
     for(const style of styleFiles){
         let dest = path.join(options.outDir, style.replace(path.normalize(options.srcDir), ''));
+        
+        if(path.extname(dest) !== '.css')
+            dest = path.join(path.dirname(dest), path.basename(dest, path.extname(dest))+'.css');
+
         if(options.files.includes(style)){
-            dest = path.join(options.outDir, path.basename(style))
+            dest = path.join(options.outDir, path.basename(style, path.extname(style))+'.css')
         }
         debug('dest', dest)
+        fs.readFile(style, 'utf-8', (err, css) => {
+            if(err){
+                console.error(err);
+            }else{
+                if(style.endsWith('.scss')){
+                    let processed = sass.renderSync({data: css, includePaths: [ options.srcDir ]});
+                    css = processed.css;
+                }
+                postcss(plugins)
+                    .process(css, { from: style, to: dest })
+                    .then(result => {
+                        fs.outputFile(result.opts.to, result.css, () => true)
+                        if ( result.map ) {
+                            fs.outputFile(result.opts.to+'.map', result.map, () => true)
+                        }
+                    })
+            }
+        })
+    }
+    if(options.tailwindcss && options.tailwindcss.src){
+        const dest = options.tailwindcss.dest ? path.join(options.tailwindcss.dest, 'tailwind.css') : path.join(options.outDir, 'tailwind.css');
+        const style = options.tailwindcss.src;
         fs.readFile(style, (err, css) => {
             if(err){
                 console.error(err);

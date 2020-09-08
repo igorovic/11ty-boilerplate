@@ -2,7 +2,7 @@ const pretty = require('pretty');
 const Debug = require('debug');
 const debug = Debug('Dyve:cleanHtml');
 
-const dev = process.env.NODE_ENV === 'development';
+const dev = String(process.env.NODE_ENV).toLowerCase() === 'development';
 
 const cleanHtml = async function(content, outputPath) {
     // clean Html if in dev mode

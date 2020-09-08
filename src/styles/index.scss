@@ -1,0 +1,9 @@
+@import 'l2/toimp.scss';
+
+.article{
+    @apply bg-blue-500;
+    @apply text-white;
+    &:hover{
+        @apply text-red-600;
+    }
+}

@@ -27,7 +27,7 @@ module.exports = function(eleventyConfig) {
         eleventyConfig.addPlugin(pluginRss);
 
         eleventyConfig.addPlugin(stencilHydrate);
-        eleventyConfig.addPlugin(injectTailwind);
+        eleventyConfig.addPlugin(injectTailwind, {url: '/styles/tailwind.css'});
         eleventyConfig.addPlugin(injectStyles);
 
         eleventyConfig.addPlugin(minifyHtml);
