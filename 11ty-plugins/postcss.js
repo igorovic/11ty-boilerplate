@@ -7,6 +7,7 @@ const cssnano = require('cssnano');
 const sass = require('node-sass');
 const tailwindcss = require('tailwindcss');
 const debug = require('debug')('Dyve:postcss')
+const debugPlugins = debug.extend('plugins');
 
 const dev = String(process.env.NODE_ENV).toLowerCase() === 'development';
 
@@ -41,6 +42,8 @@ const plugins = [
     autoprefixer({env: 'last 6 version'})
 ]
 
+debugPlugins('plugins: %O', plugins)
+
 const defaultOptions = {
     outDir: 'public/styles',
     srcDir: 'src/styles',
@@ -55,7 +58,7 @@ function postCss(_, options = defaultOptions){
     let styleFiles = WalkSync(options.srcDir)
                     .map(f => path.posix.normalize(path.join(options.srcDir, f)))
     styleFiles = styleFiles.concat(options.files)
-    debug(styleFiles);
+    debug('styles: %O', styleFiles);
     for(const style of styleFiles){
         let dest = path.join(options.outDir, style.replace(path.normalize(options.srcDir), ''));
         
@@ -65,7 +68,7 @@ function postCss(_, options = defaultOptions){
         if(options.files.includes(style)){
             dest = path.join(options.outDir, path.basename(style, path.extname(style))+'.css')
         }
-        debug('dest', dest)
+        debug('dest:', dest)
         fs.readFile(style, 'utf-8', (err, css) => {
             if(err){
                 console.error(err);

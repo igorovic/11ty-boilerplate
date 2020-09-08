@@ -11,6 +11,7 @@ const injectStyles = require('./11ty-plugins/injectStyles');
 const injectTailwind = require('./11ty-plugins/injectTailwind');
 const cleanHtml = require('./11ty-plugins/cleanHtml');
 const stencilHydrate = require('./11ty-plugins/stencilHydrate');
+const dotEnv = require('./11ty-plugins/dotenv');
 /* const Debug = require('debug');
 const { debug } = require('console'); */
 
@@ -26,6 +27,7 @@ module.exports = function(eleventyConfig) {
         eleventyConfig.setDataDeepMerge(true);
         eleventyConfig.addPlugin(pluginRss);
 
+        eleventyConfig.addPlugin(dotEnv);
         eleventyConfig.addPlugin(stencilHydrate);
         eleventyConfig.addPlugin(injectTailwind, {url: '/styles/tailwind.css'});
         eleventyConfig.addPlugin(injectStyles);
