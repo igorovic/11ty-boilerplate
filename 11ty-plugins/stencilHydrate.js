@@ -1,3 +1,6 @@
+/*
+**  Injects stencil loaders scripts in the page's <head> and hydrates Web components
+*/
 const posthtml = require ("posthtml");
 const colors = require('colors');
 const Debug = require('debug');
