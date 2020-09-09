@@ -6,14 +6,28 @@ const postcss = require('postcss');
 const cssnano = require('cssnano');
 const sass = require('node-sass');
 const tailwindcss = require('tailwindcss');
+const minimatch = require("minimatch");
 const debug = require('debug')('Dyve:postcss')
 const debugPlugins = debug.extend('plugins');
+const debugExcludes = debug.extend('excludes');
 
 const dev = String(process.env.NODE_ENV).toLowerCase() === 'development';
 
+const defaultOptions = {
+    outDir: 'public/styles',
+    srcDir: 'src/styles',
+    files: [],
+    tailwindcss: {
+        src: require.resolve('tailwindcss/tailwind.css'),
+        dest: 'public/styles'
+    },
+    exclude: []
+}
+
+let _pluginOptions = {...defaultOptions}
 /*
 ** TODO: files imported from an .scss should not be transpiled. Currently they are
-** event if the import works.
+** even if the import works.
 */ 
 function WalkSync(Path, prefix, options={ignoreDirs: false}){
     let Files = [];
@@ -36,6 +50,23 @@ function WalkSync(Path, prefix, options={ignoreDirs: false}){
 };
 
 
+function filterExcludes(FilesList){
+    let filtered = [...FilesList]
+    let excludes;
+    if(typeof _pluginOptions.exclude === 'string')
+        excludes = [_pluginOptions.exclude]
+    else
+        excludes = [..._pluginOptions.exclude]
+
+    for( let pattern of excludes){
+        debugExcludes(pattern)
+        pattern = path.normalize(pattern)
+        filtered = filtered.filter(minimatch.filter(pattern, {matchBase: true, nocase: true}))
+    }
+    return FilesList.filter(f => !filtered.includes(f));
+}
+
+
 const plugins = [
     tailwindcss('./tailwind.config.js'), 
     !dev ? cssnano({preset: 'default'}) : ()=> {null},
@@ -44,29 +75,24 @@ const plugins = [
 
 debugPlugins('plugins: %O', plugins)
 
-const defaultOptions = {
-    outDir: 'public/styles',
-    srcDir: 'src/styles',
-    files: [],
-    tailwindcss: {
-        src: require.resolve('tailwindcss/tailwind.css'),
-        dest: 'public/styles'
-    }
-}
+
 
 function postCss(_, options = defaultOptions){
-    let styleFiles = WalkSync(options.srcDir)
-                    .map(f => path.posix.normalize(path.join(options.srcDir, f)))
-    styleFiles = styleFiles.concat(options.files)
+    _pluginOptions = {...defaultOptions, ...options}
+
+    let styleFiles = WalkSync(_pluginOptions.srcDir)
+                    .map(f => path.posix.normalize(path.join(_pluginOptions.srcDir, f)))
+    styleFiles = filterExcludes(styleFiles);
+    styleFiles = styleFiles.concat(_pluginOptions.files)
     debug('styles: %O', styleFiles);
     for(const style of styleFiles){
-        let dest = path.join(options.outDir, style.replace(path.normalize(options.srcDir), ''));
+        let dest = path.join(_pluginOptions.outDir, style.replace(path.normalize(_pluginOptions.srcDir), ''));
         
         if(path.extname(dest) !== '.css')
             dest = path.join(path.dirname(dest), path.basename(dest, path.extname(dest))+'.css');
 
-        if(options.files.includes(style)){
-            dest = path.join(options.outDir, path.basename(style, path.extname(style))+'.css')
+        if(_pluginOptions.files.includes(style)){
+            dest = path.join(_pluginOptions.outDir, path.basename(style, path.extname(style))+'.css')
         }
         debug('dest:', dest)
         fs.readFile(style, 'utf-8', (err, css) => {
@@ -74,7 +100,7 @@ function postCss(_, options = defaultOptions){
                 console.error(err);
             }else{
                 if(style.endsWith('.scss')){
-                    let processed = sass.renderSync({data: css, includePaths: [ options.srcDir ]});
+                    let processed = sass.renderSync({data: css, includePaths: [ _pluginOptions.srcDir ]});
                     css = processed.css;
                 }
                 postcss(plugins)
@@ -88,9 +114,9 @@ function postCss(_, options = defaultOptions){
             }
         })
     }
-    if(options.tailwindcss && options.tailwindcss.src){
-        const dest = options.tailwindcss.dest ? path.join(options.tailwindcss.dest, 'tailwind.css') : path.join(options.outDir, 'tailwind.css');
-        const style = options.tailwindcss.src;
+    if(_pluginOptions.tailwindcss && _pluginOptions.tailwindcss.src){
+        const dest = _pluginOptions.tailwindcss.dest ? path.join(_pluginOptions.tailwindcss.dest, 'tailwind.css') : path.join(_pluginOptions.outDir, 'tailwind.css');
+        const style = _pluginOptions.tailwindcss.src;
         fs.readFile(style, (err, css) => {
             if(err){
                 console.error(err);

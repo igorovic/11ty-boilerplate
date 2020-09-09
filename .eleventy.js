@@ -35,7 +35,7 @@ module.exports = function(eleventyConfig) {
         eleventyConfig.addPlugin(minifyHtml);
         eleventyConfig.addPlugin(cleanHtml);
 
-        eleventyConfig.addPlugin(postCSS);
+        eleventyConfig.addPlugin(postCSS, {exclude: 'src/styles/l2/**/*'});
 
         eleventyConfig.addFilter("readableDate", dateObj => {
             return DateTime.fromJSDate(dateObj, {zone: 'utc'}).toFormat("dd LLL yyyy");

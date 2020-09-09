@@ -17,6 +17,7 @@
     "@11ty/eleventy-plugin-rss": "^1.0.9",
     "@stencil/core": "^2.0.3",
     "autoprefixer": "^9.8.6",
+    "colors": "^1.4.0",
     "cssnano": "^4.1.10",
     "debug": "^4.1.1",
     "dotenv": "^8.2.0",
@@ -33,5 +34,8 @@
     "rimraf": "^3.0.2",
     "tailwindcss": "^1.8.4",
     "typescript": "^4.0.2"
+  },
+  "dependencies": {
+    "minimatch": "^3.0.4"
   }
 }

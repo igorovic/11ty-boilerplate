@@ -1,4 +1,5 @@
-const dotenv = require('dotenv')
+const dotenv = require('dotenv');
+const colors = require('colors');
 const Debug = require('debug');
 const debug = Debug('Dyve:dotenv');
 
@@ -12,7 +13,7 @@ const dotEnv =  function() {
         debug('dotenv: %O', result);
         return result.parsed;
     }catch(err){
-        console.error('11ty plugin dotenv: ', err.message);
+        console.error('11ty plugin dotenv: '.red, colors.red(err.message));
     }
     return result;
 };
