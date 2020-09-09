@@ -1,7 +1,7 @@
 {
   "name": "eleventy",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "11ty boilerplate code for starting a web project",
   "main": "index.js",
   "scripts": {
     "build": "npx stencil build --prerender && npx @11ty/eleventy",

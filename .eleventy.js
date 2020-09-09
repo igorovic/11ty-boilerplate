@@ -1,25 +1,27 @@
-const url = require('url');
-const fs = require('fs');
-const path = require('path');
-const minifyHtml = require('./11ty-plugins/minifyHtml');
-const { DateTime } = require("luxon");
-const pluginRss = require("@11ty/eleventy-plugin-rss");
+try{
+    require('dotenv').config()
+}catch(err){ null }
+
+const colors = require('colors');
 const json5 = require('json5');
 const flatted = require('flatted');
+const { DateTime } = require("luxon");
+const pluginRss = require("@11ty/eleventy-plugin-rss");
+const minifyHtml = require('./11ty-plugins/minifyHtml');
 const postCSS = require('./11ty-plugins/postcss');
 const injectStyles = require('./11ty-plugins/injectStyles');
 const injectTailwind = require('./11ty-plugins/injectTailwind');
 const cleanHtml = require('./11ty-plugins/cleanHtml');
 const stencilHydrate = require('./11ty-plugins/stencilHydrate');
 const dotEnv = require('./11ty-plugins/dotenv');
-/* const Debug = require('debug');
-const { debug } = require('console'); */
 
 
 const dev = process.env.NODE_ENV === 'development';
 
-function selectivBuild(){
-    return 'src/pages';
+const DEFAULT_SOURCE = 'src/pages';
+
+function selectivBuild(srcDefault){
+    return srcDefault;
 }
 
 module.exports = function(eleventyConfig) {
@@ -68,23 +70,15 @@ module.exports = function(eleventyConfig) {
         eleventyConfig.addFilter('ObjectKeys', (obj) => {
             return Object.keys(obj);
         });
-
-        eleventyConfig.addShortcode("stencil", function(namespace) {
-            const ns = url.parse(namespace).hostname.replace('.', '-');
-            const stencil = `
-            <script type="module" src="/build/${ns}.esm.js"></script>
-            <script nomodule src="/build/${ns}.js"></script>`;
-            return stencil;
-        });
         
         eleventyConfig.addPassthroughCopy("src/static");
         //eleventyConfig.addPassthroughCopy("src/styles");
     }catch(err){
-        console.log('.elenventy.js imported outside Eleventy!');
+        console.info(colors.green('.elenventy.js imported outside Eleventy!'));
     }
     return {
         dir: {
-            input: selectivBuild(),
+            input: selectivBuild() || DEFAULT_SOURCE,
             includes: "../includes",
             data: "../data",
             output: "public"

@@ -26,8 +26,7 @@ const defaultOptions = {
 
 let _pluginOptions = {...defaultOptions}
 /*
-** TODO: files imported from an .scss should not be transpiled. Currently they are
-** even if the import works.
+** pluginOption.exclude allows to exclude some files from postCSS processing
 */ 
 function WalkSync(Path, prefix, options={ignoreDirs: false}){
     let Files = [];

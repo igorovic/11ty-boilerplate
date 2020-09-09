@@ -13,5 +13,8 @@
     "author": {
       "name": "Your Name Here",
       "email": "youremailaddress@example.com"
+    },
+    "stencil": {
+      "namespace": "dyve"
     }
 }

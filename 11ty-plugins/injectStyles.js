@@ -1,9 +1,7 @@
 const fs = require('fs');
 const path = require('path');
+const colors = require('colors');
 const posthtml = require ("posthtml");
-
-/* const jsdom = require("jsdom");
-const { JSDOM } = jsdom; */
 
 const Debug = require('debug');
 const debug = Debug('Dyve:injectStyles')
@@ -22,7 +20,7 @@ const injectStyles = async function(content, outputPath) {
     else if (typeof this.frontMatter.data.styles === 'string')
         styles = [this.frontMatter.data.styles]
     else {
-        console.error('frontMatter styles must be array or string for', outputPath)
+        console.error('frontMatter `styles` must be an Array of strings for'.red, colors.red(outputPath));
         return content;
     }
     const injectStylesheet = (tree) =>{
@@ -53,19 +51,6 @@ const injectStyles = async function(content, outputPath) {
     ])
     .process(content);
     result = R.html;
-    /* const dom = new JSDOM(content);
-    
-    styles.forEach((styleFile) => {
-        if(fs.existsSync(path.join('public', styleFile))){
-            debug(outputPath);
-            let sc = dom.window.document.createElement("link");
-            sc.setAttribute("rel", "stylesheet");
-            sc.setAttribute("href", styleFile);
-            dom.window.document.head.appendChild(sc);
-        }
-    })
-    
-    return dom.serialize(); */
     return result;
 };
 

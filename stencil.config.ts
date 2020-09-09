@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import url from 'url';
+import colors from 'colors';
 import { Config } from '@stencil/core';
 import eleventyConfig from './.eleventy.js';
 
@@ -16,7 +16,14 @@ const metadata = JSON.parse(fs.readFileSync(path.join(dataDir, 'metadata.json'),
 const baseUrl = dev ? 'http://localhost:4488' 
                 : metadata && metadata.url ? metadata.url : 'http://localhost:4488';
 
-const namespace = url.parse(baseUrl).hostname.replace('.', '-');
+//const namespace = metadata.stencil.namespace;
+let namespace = '_namespace_fallback_';
+try{
+  namespace = metadata.stencil.namespace;
+}catch(err){
+  console.error(colors.red(err.message))
+  console.info(colors.yellow('Make sure you have defined a global datasource metadata.stencil.namespace'))
+}
 
 export const config: Config = {
   namespace,
